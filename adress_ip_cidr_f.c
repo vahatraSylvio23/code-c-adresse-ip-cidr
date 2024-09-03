@@ -6,8 +6,42 @@
 
 void give_ip(char *add_ip , char *SR)
 {
+    typedef struct MSR
+    {
+        int a,b,c,d;
+    }MSR;
+    int i;
+    MSR msr;   
+    char MSR1[20];
+    int power[8];
+    power[0] = 128 ;
+    for(i = 1 ; i < 8 ; i++)
+    {
+        power[i] = power[i - 1]  / 2;
+    }
+
+msr.a = -1,msr.b = -1,msr.c = -1,msr.d = -1 ;
+
     printf("Entrer l'adresse ip :");
     scanf("%s",add_ip);
+
+    printf("Saisissez le MSR : ");
+    scanf("%s",MSR1);
+    sscanf(MSR1, "%d.%d.%d.%d",&msr.a,&msr.b,&msr.c,&msr.d);
+    do
+    {
+
+    printf("Saisissez le MSR : ");
+    scanf("%s",MSR1);
+    sscanf(MSR1, "%d.%d.%d.%d",&msr.a,&msr.b,&msr.c,&msr.d);
+        for(i=0 ; i < 8 ; i++)
+        {
+            if(msr.a != power[i] || msr.b !=power[i] || msr.c != power[i] || msr.d != power[i] )
+            {
+                printf("Masque Sous Reseau invalide !!!\n\n");
+            }
+        }
+    }while((msr.a != power[i] || msr.b !=power[i] || msr.c != power[i] || msr.d != power[i] ));
 }
 
 
@@ -40,6 +74,10 @@ void get_ip(char *add_ip ,ip *address ,char *SR)
         printf("Ce n'est pas un adresse ip\n\n");
         exit(EXIT_SUCCESS);
     }
+
+
+    printf("Affichage en binaire : \n");
+    printf("__________________ ________________ ________________ _______________\n");
     bin(address->a);
     printf(".");
     bin(address->b);
@@ -48,6 +86,8 @@ void get_ip(char *add_ip ,ip *address ,char *SR)
     printf(".");
     bin(address->d);
     printf("\n");
+    printf("`````````````````` ````````````````` ```````````````` ````````````````\n");
+
 }
 
 
@@ -66,7 +106,7 @@ void verifie(ip address)
                 printf("                                 ___________\n");
                 printf("Le masque de sous reseau est  : | 255.0.0.0 |\n\n");
                 printf("                           _________ \n");
-                printf("L'adresse du Reseau est : |%d.1.1.1 |\n\n",address.a);
+                printf("L'adresse du Reseau est : |%d.0.0.0 |\n\n",address.a);
                 printf("                               ________________ \n");
                 printf("L'adresse du broadcast est  : | %d.255.255.255 |\n\n",address.a);
                 printf("                                                            ____________\n");
@@ -84,7 +124,7 @@ void verifie(ip address)
                 printf("                                  __________\n");
                 printf("Le masque de sous reseau est  : | 255.0.0.0 |");
                 printf("                            _________ \n");
-                printf("L'adresse du Reseau est  : |%d.%d.1.1|\n\n",address.a,address.b);
+                printf("L'adresse du Reseau est  : |%d.%d.0.0|\n\n",address.a,address.b);
                 printf("                               _____________ \n");
                 printf("L'adresse du broadcast est  : |%d.%d.255.255|\n\n",address.a,address.b);
                 printf("                                                             _______ \n");
@@ -98,18 +138,15 @@ void verifie(ip address)
                 address.SR = 24;
                 printf("                              ___ \n");
                 printf("L'adresse ip est de class  : | C |\n\n");
-                printf("                                 _______________\n");
+                printf("                            _______________\n");
                 printf("Le masque de reseau est  : | 255.255.255.0 |\n");
                 printf("                            ____________ \n");
-                printf("L'adresse du Reseau est  : | %d.%d.%d.1 |\n\n",address.a,address.b,address.c);
+                printf("L'adresse du Reseau est  : | %d.%d.%d.0 |\n\n",address.a,address.b,address.c);
                 printf("                               ______________ \n");
                 printf("L'adresse du broadcast est  : | %d.%d.%d.255 | \n\n",address.a,address.b,address.c);
-                printf("                              ___ \n");
-                printf("Le nombre de machine disponible sur ce reseau est alors :  254\n\n");
+                printf("                                                           ___ \n");
+                printf("Le nombre de machine disponible sur ce reseau est alors : |254|\n\n");
                 printf("Le CIDR(Classless Inter Domain Routing ) est %d.%d.%d.%d/%d \n",address.a,address.b,address.c,address.d,address.SR);
-
-
-
 
                 decoupe(&decoupage);
                 int add_out = 0;
@@ -121,12 +158,14 @@ void verifie(ip address)
                             if(i==0)
                             {
                                     printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+127);
+ 
+ printf("\t ---------------\n");                                  printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+127);
                             }
                             else
                             {
                                 printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+127);
+                                printf("\t ---------------");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+127);
                             }
                             printf("\n");
                             add_out = add_out + 127 ;
@@ -141,13 +180,15 @@ void verifie(ip address)
                         {
                             if(i==0)
                             {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+63);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+                                printf("\t ---------------\n");
+                               printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+63);
                             }
                             else
                             {
                                 printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+63);
+                                printf("\t ---------------");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+63);
                             }
                             printf("\n");
                             add_out = add_out + 63 ;
@@ -160,15 +201,17 @@ void verifie(ip address)
                     {
                         for(i=0 ; i < 8 ; i++)
                         {
-                            if(i==0)
-                            {
+                                if(i==0)
+                                {
                                     printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+31);
-                            }
-                            else
-                            {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+31);
+                                    printf("\t ---------------\n");
+                                   printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+31);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
+                                    printf("\t ---------------");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+31);
                             }
                             printf("\n");
                             add_out = add_out + 31 ;
@@ -186,12 +229,14 @@ void verifie(ip address)
                             if(i==0)
                             {
                                     printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+15);
+                                    printf("\t ---------------\n");                                  
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+15);
                             }
                             else
                             {
                                 printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+15);
+                                printf("\t ---------------");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+15);
                             }
                             printf("\n");
                             add_out = add_out + 15 ;
@@ -208,12 +253,14 @@ void verifie(ip address)
                             if(i==0)
                             {
                                     printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+7);
+                                    printf("\t ---------------\n");                                  
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+7);
                             }
                             else
                             {
                                 printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+7);
+                                printf("\t ---------------");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+7);
                             }
                             printf("\n");
                             add_out = add_out + 7 ;
@@ -227,16 +274,18 @@ void verifie(ip address)
                         printf("\t | adresse  ip |\n\n");
                         for(i=0 ; i < 64 ; i++)
                         {
-                            if(i==0)
-                            {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+4);
-                            }
-                            else
-                            {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+4);
-                            }
+                                if(i==0)
+                                {
+                                        printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+ 
+ printf("\t ---------------\n");                                      printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+4);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
+                                    printf("\t ---------------");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+4);
+                                }
                             printf("\n");
                             add_out = add_out + 4 ;
                         }
@@ -249,16 +298,18 @@ void verifie(ip address)
                         printf("\t | adresse  ip |\n\n");
                         for(i=0 ; i < 128 ; i++)
                         {
-                            if(i==0)
-                            {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+2);
-                            }
-                            else
-                            {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+2);
-                            }
+                                if(i==0)
+                                {
+                                        printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+ 
+ printf("\t ---------------\n");                                      printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+2);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
+                                    printf("\t ---------------");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+2);
+                                }
                             printf("\n");
                             add_out = add_out + 2 ;
                         }
@@ -288,43 +339,49 @@ void verifie(ip address)
 
 void bin(int a)
 {
-    ip address;
-    int b;
-    int c;
-    int d;
     int rest[8];
-    int i, j, k, l;
-    d = a ;
-    c = a % 2 ; 
+    int power[8];
+    int temp = 0;
+    int temporary = 0 ;
+    int i;
+    power[0] = 128 ;
+    for(i = 1 ; i < 8 ; i++)
+    {
+        power[i] = power[i - 1]  / 2;
+    }
     for(i = 0 ; i < 8 ; i++)
     {
-        if(c == 1)
+        rest[i] = 0 ; 
+    }
+    for(i = 0 ; i < 8 ; i++)
+    {
+        if(a > power[i])
         {
-
-            d = d-1;
-            b = d / 2 ;
-            if(b % 2 == 1)
+            temp += power[i] ;
+            if(a > temp)
             {
-                b = b - 1;
+                    rest[i] = 1;
             }
-            rest[i] = 1;
-        }
-        else if(c == 0)
-        {
-            b = d / 2 ;
-            c = d ;
-
-            if(b % 2 == 1)
+            if(temp > a)
             {
-                b = b - 1;
+                temp -= power[i] ;
             }
-            rest[i]=0;
+            else if (temp == a)
+            {
+                rest[i] = 1 ;
+                break;
+            }
         }
+    }
+
+    if(a % 2 == 0)
+    {
+        rest[7] = 0 ;
     }
 
     for(i = 0 ; i < 8 ; i++)
     {
-        printf("%d",rest[i]);
+        printf("%d ",rest[i]);
     }
 }
 
