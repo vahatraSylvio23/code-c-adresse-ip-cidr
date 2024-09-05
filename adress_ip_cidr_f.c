@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include "adress_ip_cidr.h"
 
@@ -14,34 +14,34 @@ void give_ip(char *add_ip , char *SR)
     MSR msr;   
     char MSR1[20];
     int power[8];
+    int temp  ;
     power[0] = 128 ;
     for(i = 1 ; i < 8 ; i++)
     {
         power[i] = power[i - 1]  / 2;
     }
 
-msr.a = -1,msr.b = -1,msr.c = -1,msr.d = -1 ;
+    msr.a = -1,msr.b = -1,msr.c = -1,msr.d = -1 ;
 
     printf("Entrer l'adresse ip :");
     scanf("%s",add_ip);
 
-    printf("Saisissez le MSR : ");
-    scanf("%s",MSR1);
-    sscanf(MSR1, "%d.%d.%d.%d",&msr.a,&msr.b,&msr.c,&msr.d);
     do
     {
-
-    printf("Saisissez le MSR : ");
-    scanf("%s",MSR1);
-    sscanf(MSR1, "%d.%d.%d.%d",&msr.a,&msr.b,&msr.c,&msr.d);
+        printf("Saisissez le MSR : ");
+        scanf("%s",MSR1);
+        sscanf(MSR1, "%d.%d.%d.%d",&msr.a,&msr.b,&msr.c,&msr.d);
+        temp = 0 ;
         for(i=0 ; i < 8 ; i++)
         {
-            if(msr.a != power[i] || msr.b !=power[i] || msr.c != power[i] || msr.d != power[i] )
+            temp +=power[i] ;
+            if(msr.a != temp || msr.b != temp || msr.c != temp || msr.d != temp )
             {
                 printf("Masque Sous Reseau invalide !!!\n\n");
             }
         }
-    }while((msr.a != power[i] || msr.b !=power[i] || msr.c != power[i] || msr.d != power[i] ));
+        system("clear");
+    }while(msr.a != temp || msr.b !=temp || msr.c != temp || msr.d != temp);
 }
 
 
@@ -96,7 +96,7 @@ void get_ip(char *add_ip ,ip *address ,char *SR)
 
 void verifie(ip address)
 {
-    int decoupage;
+    int decoupage = -1;
     int i;
     if(address.a >= 0 && address.a < 128)
     {
@@ -113,11 +113,179 @@ void verifie(ip address)
                 printf("Le nombre de machine disponible sur ce reseau est alors  : | 16.777.214 |\n\n");
                 printf("Le CIDR(Classless Inter Domain Routing ) est %d.%d.%d.%d/%d \n",address.a,address.b,address.c,address.d,address.SR);
 
+                decoupe(&decoupage);
+                int sousReseau = 0;
+                int broadcast = 1;
+                    if(decoupage == 1 )
+                    {
+                        for(i=0 ; i < 2 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                printf("\t ---------------\n");                  
+                                printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+127);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+127);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 127 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.128.0.0\n");                     
+                    }
+
+                    else if(decoupage == 2 )
+                    {
+                        for(i=0 ; i < 4 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                printf("\t ---------------\n");
+                               printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+63);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+63);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 63 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.192.0.0\n");                     
+                        }
+
+                    else if(decoupage == 3 )
+                    {
+                        for(i=0 ; i < 8 ; i++)
+                        {
+                                if(i==0)
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                    printf("\t ---------------\n");
+                                   printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+31);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+31);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 31 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.224.0.0\n");                    
+                        }
+
+                    else if(decoupage == 4 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 16 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                    printf("\t ---------------\n");                                  
+                                    printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+15);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+15);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 15 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.240.0.0\n");
+                    }
+                    else if(decoupage == 5 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 32 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                    printf("\t ---------------\n");                                  
+                                    printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+7);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+7);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 7 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.248.0.0\n");
+                    }
+                    else if(decoupage == 6 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 64 ; i++)
+                        {
+                                if(i==0)
+                                {
+                                        printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                        printf("\t ---------------\n");
+                                        printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+4);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+4);
+                                }
+                            printf("\n");
+                            sousReseau = sousReseau + 4 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.252.0.0\n");
+                    }   
+                    else if(decoupage == 7 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 128 ; i++)
+                        {
+                                if(i==0)
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+2);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.0.0 \n",address.a,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.0.0 \n\n",address.a,sousReseau+2);
+                                }
+                            printf("\n");
+                            sousReseau = sousReseau + 2 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.253.0.0\n");
+                    }
     }
 
     else if(address.a >= 128 && address.a < 192)
     {
-                int decoupage;
+                int decoupage = -1;
                 address.SR = 16;
                 printf("                              ___ \n");
                 printf("L'adresse ip est de class  : | B |\n\n");
@@ -130,6 +298,175 @@ void verifie(ip address)
                 printf("                                                             _______ \n");
                 printf("Le nombre de machine disponible sur ce reseau est alors  : | 65.534 |\n\n");
                 printf("Le CIDR(Classless Inter Domain Routing ) est %d.%d.%d.%d/%d \n",address.a,address.b,address.c,address.d,address.SR);
+
+                decoupe(&decoupage);
+                int sousReseau = 0;
+                int broadcast = 1;
+                    if(decoupage == 1 )
+                    {
+                        for(i=0 ; i < 2 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                printf("\t ---------------\n");                  
+                                printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+127);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+127);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 127 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.128.0\n");                     
+                    }
+
+                    else if(decoupage == 2 )
+                    {
+                        for(i=0 ; i < 4 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                printf("\t ---------------\n");
+                               printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+63);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+63);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 63 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.192.0\n");                     
+                        }
+
+                    else if(decoupage == 3 )
+                    {
+                        for(i=0 ; i < 8 ; i++)
+                        {
+                                if(i==0)
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                    printf("\t ---------------\n");
+                                   printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+31);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+31);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 31 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.224.0\n");                    
+                        }
+
+                    else if(decoupage == 4 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 16 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                    printf("\t ---------------\n");                                  
+                                    printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+15);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+15);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 15 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.240.0\n");
+                    }
+                    else if(decoupage == 5 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 32 ; i++)
+                        {
+                            if(i==0)
+                            {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                    printf("\t ---------------\n");                                  
+                                    printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+7);
+                            }
+                            else
+                            {
+                                printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+7);
+                            }
+                            printf("\n");
+                            sousReseau = sousReseau + 7 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.248.0\n");
+                    }
+                    else if(decoupage == 6 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 64 ; i++)
+                        {
+                                if(i==0)
+                                {
+                                        printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                        printf("\t ---------------\n");
+                                        printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+4);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+4);
+                                }
+                            printf("\n");
+                            sousReseau = sousReseau + 4 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.252.0\n");
+                    }   
+                    else if(decoupage == 7 )
+                    {
+                        printf("Les adresses reseaux apres decoupage est  :\n");
+                        printf("\t | adresse  ip |\n\n");
+                        for(i=0 ; i < 128 ; i++)
+                        {
+                                if(i==0)
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+2);
+                                }
+                                else
+                                {
+                                    printf("\t | sous-reseau |: %d.%d.%d.0 \n",address.a,address.b,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.0 \n\n",address.a,address.b,sousReseau+2);
+                                }
+                            printf("\n");
+                            sousReseau = sousReseau + 2 ;
+                        }
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
+                        printf("Le masque de sous-reseau est : 255.255.253.0\n");
+                    }
 
     }
 
@@ -149,28 +486,28 @@ void verifie(ip address)
                 printf("Le CIDR(Classless Inter Domain Routing ) est %d.%d.%d.%d/%d \n",address.a,address.b,address.c,address.d,address.SR);
 
                 decoupe(&decoupage);
-                int add_out = 0;
-                int add_in = 1;
+                int sousReseau = 0;
+                int broadcast = 1;
                     if(decoupage == 1 )
                     {
                         for(i=0 ; i < 2 ; i++)
                         {
                             if(i==0)
                             {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
- 
- printf("\t ---------------\n");                                  printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+127);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
+                                printf("\t ---------------\n");                  
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+127);
                             }
                             else
                             {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t ---------------");
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+127);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+127);
                             }
                             printf("\n");
-                            add_out = add_out + 127 ;
+                            sousReseau = sousReseau + 127 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.128\n");                     
                     }
 
@@ -180,20 +517,20 @@ void verifie(ip address)
                         {
                             if(i==0)
                             {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
                                 printf("\t ---------------\n");
-                               printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+63);
+                               printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+63);
                             }
                             else
                             {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t ---------------");
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+63);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+63);
                             }
                             printf("\n");
-                            add_out = add_out + 63 ;
+                            sousReseau = sousReseau + 63 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.192\n");                     
                         }
 
@@ -203,20 +540,20 @@ void verifie(ip address)
                         {
                                 if(i==0)
                                 {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
                                     printf("\t ---------------\n");
-                                   printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+31);
+                                   printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+31);
                                 }
                                 else
                                 {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                    printf("\t ---------------");
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+31);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+31);
                             }
                             printf("\n");
-                            add_out = add_out + 31 ;
+                            sousReseau = sousReseau + 31 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.224\n");                    
                         }
 
@@ -228,20 +565,20 @@ void verifie(ip address)
                         {
                             if(i==0)
                             {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
                                     printf("\t ---------------\n");                                  
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+15);
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+15);
                             }
                             else
                             {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t ---------------");
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+15);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+15);
                             }
                             printf("\n");
-                            add_out = add_out + 15 ;
+                            sousReseau = sousReseau + 15 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.240\n");
                     }
                     else if(decoupage == 5 )
@@ -252,20 +589,20 @@ void verifie(ip address)
                         {
                             if(i==0)
                             {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
                                     printf("\t ---------------\n");                                  
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+7);
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+7);
                             }
                             else
                             {
-                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                printf("\t ---------------");
-                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+7);
+                                printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                printf("\t ---------------\n");
+                                printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+7);
                             }
                             printf("\n");
-                            add_out = add_out + 7 ;
+                            sousReseau = sousReseau + 7 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.248\n");
                     }
                     else if(decoupage == 6 )
@@ -276,20 +613,20 @@ void verifie(ip address)
                         {
                                 if(i==0)
                                 {
-                                        printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
- 
- printf("\t ---------------\n");                                      printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+4);
+                                        printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
+                                        printf("\t ---------------\n");
+                                        printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+4);
                                 }
                                 else
                                 {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                    printf("\t ---------------");
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+4);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+4);
                                 }
                             printf("\n");
-                            add_out = add_out + 4 ;
+                            sousReseau = sousReseau + 4 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.252\n");
                     }   
                     else if(decoupage == 7 )
@@ -300,20 +637,20 @@ void verifie(ip address)
                         {
                                 if(i==0)
                                 {
-                                        printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out);
- 
- printf("\t ---------------\n");                                      printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+2);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+2);
                                 }
                                 else
                                 {
-                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,add_out+1);
-                                    printf("\t ---------------");
-                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,add_out+2);
+                                    printf("\t | sous-reseau |: %d.%d.%d.%d \n",address.a,address.b,address.c,sousReseau+1);
+                                    printf("\t ---------------\n");
+                                    printf("\t | broadcast   |: %d.%d.%d.%d \n\n",address.a,address.b,address.c,sousReseau+2);
                                 }
                             printf("\n");
-                            add_out = add_out + 2 ;
+                            sousReseau = sousReseau + 2 ;
                         }
-                        printf("On a donnee  %d bit au reseaux\n",decoupage);
+                        printf("On a donnee  %d-bits au reseaux\n",decoupage);
                         printf("Le masque de sous-reseau est : 255.255.255.253\n");
                     }
                     }   
